@@ -8511,6 +8511,8 @@ with pkgs;
 
   neochat = libsForQt5.callPackage ../applications/networking/instant-messengers/neochat { };
 
+  kdiskmark = libsForQt5.callPackage ../applications/kdiskmark {};
+
   neofetch = callPackage ../tools/misc/neofetch { };
 
   nerdfonts = callPackage ../data/fonts/nerdfonts { };

@@ -21,19 +21,15 @@ mkDerivation rec {
     sha256 = "sha256-9ufRxEbqwcRs+m/YW8D3+1USCJNZEaOUZRec7gvgmtA=";
   };
 
-  nativeBuildInputs = [ cmake extra-cmake-modules ];
+  nativeBuildInputs = [ cmake extra-cmake-modules wrapQtAppsHook ];
 
   buildInputs = [
-    wrapQtAppsHook
     qttools
     kauth
     qtbase 
   ];
 
-  propagatedBuildInputs = [
-    fio
-  ];
-
+  qtWrapperArgs = [ ''--prefix PATH : ${lib.makeBinPath [ fio ]}'' ];
 
   meta = with lib; {
     description = "";

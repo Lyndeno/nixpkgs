@@ -53,6 +53,7 @@ in
     ])
 
     (mkRemovedOptionModule [ "services" "xserver" "displayManager" "gdm" "nvidiaWayland" ] "We defer to GDM whether Wayland should be enabled.")
+    (mkRemovedOptionModule [ "services" "xserver" "displayManager" "gdm" "autoSuspend" ] "Refer to suspend.battery.enable and suspend.ac.enable.")
   ];
 
   meta = {
@@ -86,13 +87,39 @@ in
         '';
       };
 
-      autoSuspend = mkOption {
-        default = true;
-        description = ''
-          On the GNOME Display Manager login screen, suspend the machine after inactivity.
-          (Does not affect automatic suspend while logged in, or at lock screen.)
-        '';
-        type = types.bool;
+      suspend = {
+        ac = {
+          enable = mkOption {
+            default = true;
+            description = ''
+              On the GNOME Display Manager login screen, suspend the machine after inactivity when plugged in.
+              (Does not affect automatic suspend while logged in, or at lock screen.)
+            '';
+          };
+          timeout = mkOption {
+            type = types.nullOr types.int;
+            default = null;
+            description = ''
+              Seconds of inactivity after which autosuspend will be performed when plugged in.
+            '';
+          };
+        };
+        battery = {
+          enable = mkOption {
+            default = true;
+            description = ''
+              On the GNOME Display Manager login screen, suspend the machine after inactivity when on battery.
+              (Does not affect automatic suspend while logged in, or at lock screen.)
+            '';
+          };
+          timeout = mkOption {
+            type = types.nullOr types.int;
+            default = null;
+            description = ''
+              Seconds of inactivity after which autosuspend will be performed when on battery.
+            '';
+          };
+        };
       };
 
       banner = mkOption {
@@ -242,14 +269,21 @@ in
 
     systemd.user.services.dbus.wantedBy = [ "default.target" ];
 
-    programs.dconf.profiles.gdm.databases = lib.optionals (!cfg.gdm.autoSuspend) [{
-      settings."org/gnome/settings-daemon/plugins/power" = {
+    programs.dconf.profiles.gdm.databases = [{
+      settings."org/gnome/settings-daemon/plugins/power" = if cfg.gdm.suspend.ac.enable then {
+        sleep-inactive-ac-timeout = lib.mkIf (cfg.gdm.suspend.ac.timeout != null) lib.gvariant.mkInt32 cfg.gdm.suspend.ac.timeout;
+      } else {
         sleep-inactive-ac-type = "nothing";
-        sleep-inactive-battery-type = "nothing";
         sleep-inactive-ac-timeout = lib.gvariant.mkInt32 0;
+      };
+    }] ++ [{
+      settings."org/gnome/settings-daemon/plugins/power" = if cfg.gdm.suspend.battery.enable then {
+        sleep-inactive-battery-timeout = lib.mkIf (cfg.gdm.suspend.battery.timeout != null) lib.gvariant.mkInt32 cfg.gdm.suspend.battery.timeout;
+      } else {
+        sleep-inactive-battery-type = "nothing";
         sleep-inactive-battery-timeout = lib.gvariant.mkInt32 0;
       };
-    }] ++ lib.optionals (cfg.gdm.banner != null) [{
+    }]++ lib.optionals (cfg.gdm.banner != null) [{
       settings."org/gnome/login-screen" = {
         banner-message-enable = true;
         banner-message-text = cfg.gdm.banner;

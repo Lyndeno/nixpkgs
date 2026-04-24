@@ -242,7 +242,7 @@ GEM
     em-socksify (0.3.3)
       base64
       eventmachine (>= 1.0.0.beta.4)
-    erb (6.0.1)
+    erb (6.0.1.1)
     erubi (1.13.1)
     eventmachine (1.2.7)
     faker (3.5.3)

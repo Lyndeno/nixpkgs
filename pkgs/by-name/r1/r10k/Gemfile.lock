@@ -5,7 +5,7 @@ GEM
     colored2 (4.0.3)
     cri (2.15.12)
     erubi (1.13.1)
-    faraday (2.14.1)
+    faraday (2.14.2)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -26,7 +26,7 @@ GEM
       fast_gettext (~> 2.1)
       gettext (~> 3.4)
       locale
-    json (2.18.1)
+    json (2.19.5)
     jwt (2.10.2)
       base64
     locale (2.1.4)
